@@ -1,4 +1,5 @@
-﻿using DapperQueryBuilder;
+﻿using Dapper;
+using DapperQueryBuilder;
 using InterpolatedSql.Dapper.SqlBuilders;
 using Microsoft.Extensions.Options;
 using System;
@@ -36,6 +37,11 @@ namespace NSubstitute.DbConnection.Issue9
                     ");
 
                 bool result = await branchesQuery.ExecuteScalarAsync<bool>();
+
+                result = await conn.ExecuteScalarAsync<bool>(
+                    $@"SELECT COUNT(DISTINCT 1) AS Id
+                                                    FROM Orders
+                                                    AND OrderId = {id}");
 
                 return result;
             }
