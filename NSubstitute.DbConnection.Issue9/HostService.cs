@@ -46,5 +46,21 @@ namespace NSubstitute.DbConnection.Issue9
                 return result;
             }
         }
+
+        public async Task<List<string>> GetListOfString()
+        {
+            using(IDbConnection conn = _dbConnectionFactory.GetConnection(_DbOptions.CurrentValue.ConnectionString))
+            {
+                if(conn.State != ConnectionState.Open)
+                    conn.Open();
+
+                QueryBuilder qb = conn.QueryBuilder(
+                    $@"Select Distinct FileName
+                            FROM John_Lewis_Transaction_Staging
+                                                          ");
+
+                return qb.Query<string>().ToList();
+            }
+        }
     }
 }

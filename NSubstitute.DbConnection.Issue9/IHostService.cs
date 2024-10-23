@@ -9,5 +9,7 @@ namespace NSubstitute.DbConnection.Issue9
     public interface IHostService
     {
         public Task<bool> GetBool(int id);
+
+        public Task<List<string>> GetListOfString();
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NSubstitute.DbConnection;
+using System.Dynamic;
 
 namespace NSubstitute.DbConnection.Issue9
 {
@@ -27,6 +28,26 @@ namespace NSubstitute.DbConnection.Issue9
             bool result = await sut.GetBool(1);
 
             Assert.True(result);
+        }
+
+        [Fact]
+        public async void Test2()
+        {
+            System.Data.Common.DbConnection dbconn = Substitute.For<System.Data.Common.DbConnection>().SetupCommands();
+            dbconn.SetupQuery(q => q.Contains("Select Distinct FileName"))
+                .Returns(new { FileName = "File1" }, new { FileName = "File2" });
+            IDbConnectionFactory connFactory = Substitute.For<IDbConnectionFactory>();
+            connFactory.GetConnection(default).ReturnsForAnyArgs(dbconn);
+
+            IOptionsMonitor<DbOptions> opt = Substitute.For<IOptionsMonitor<DbOptions>>();
+            DbOptions o = new DbOptions() { ConnectionString = "Test" };
+            opt.CurrentValue.ReturnsForAnyArgs(o);
+
+            HostService sut = new HostService(connFactory, opt);
+
+            List<string> ret = await sut.GetListOfString();
+
+            Assert.NotEmpty(ret);
         }
     }
 }
